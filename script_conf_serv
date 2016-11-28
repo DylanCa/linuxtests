@@ -1,0 +1,34 @@
+#!/bin/bash
+
+echo "$1	IN	CNAME	WSSYSCP1" >> /etc/bind/db.workshop.fr
+
+mkdir /var/www/$1
+touch /var/www/$1/index.html
+
+echo "$1" >> /var/www/$1/index.html
+
+touch /etc/apache2/sites-available/$1.workshop.fr.conf
+cat <<EOF > /etc/apache2/sites-available/$1.workshop.fr.conf
+
+<VirtualHost $1.workshop.fr:8080>
+
+        ServerName $1.workshop.fr
+
+        ServerAdmin webmaster@localhost
+        ServerPath "/var/www/$1/"
+        DocumentRoot "/var/www/$1/"
+
+        ErrorLog ${APACHE_LOG_DIR}/error.log
+        CustomLog ${APACHE_LOG_DIR}/access.log combined
+
+</VirtualHost>
+
+# vim: syntax=apache ts=4 sw=4 sts=4 sr noet
+
+EOF
+
+a2ensite $1.workshop.fr.conf
+service bind9 restart
+service apache2 restart
+
+echo "Le serveur $1 a bien été ajouté"
